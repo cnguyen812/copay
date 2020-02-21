@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as bitauthService from 'bitauth';
 import { Events } from 'ionic-angular';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { filter } from 'rxjs/operators/filter';
+import { take } from 'rxjs/operators/take';
 import { InAppBrowserRef } from '../../models/in-app-browser/in-app-browser-ref.model';
 import { User } from '../../models/user/user.model';
 import { ActionSheetProvider } from '../../providers/action-sheet/action-sheet';
@@ -40,7 +42,7 @@ export class IABCardProvider {
     private iab: InAppBrowserProvider,
     private translate: TranslateService,
     private profileProvider: ProfileProvider
-  ) {}
+  ) { }
 
   async getCards() {
     const json = {
@@ -91,9 +93,9 @@ export class IABCardProvider {
             cards
           );
         },
-        () => {}
+        () => { }
       );
-    } catch (err) {}
+    } catch (err) { }
   }
 
   init(): void {
@@ -159,11 +161,10 @@ export class IABCardProvider {
          *
          * */
         case 'pairingOnly':
-          const subscription: Subscription = this.user$.subscribe(user => {
-            if (Object.entries(user).length === 0) {
-              return;
-            }
-
+          this.user$.pipe(
+            filter((user) => Object.entries(user).length > 0),
+            take(1)
+          ).subscribe(() => {
             this.cardIAB_Ref.hide();
 
             this.cardIAB_Ref.executeScript(
@@ -183,7 +184,6 @@ export class IABCardProvider {
               }
             );
             infoSheet.present();
-            subscription.unsubscribe();
           });
 
           break;
@@ -270,7 +270,7 @@ export class IABCardProvider {
                 );
               }
             );
-          } catch (err) {}
+          } catch (err) { }
 
           break;
 
