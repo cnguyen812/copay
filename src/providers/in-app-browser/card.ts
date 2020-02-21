@@ -26,6 +26,8 @@ export class IABCardProvider {
   private cardIAB_Ref: InAppBrowserRef;
   private NETWORK = 'testnet';
   private BITPAY_API_URL = 'https://test.bitpay.com';
+  private _isHidden = true;
+  private _pausedState = false;
 
   public user = new BehaviorSubject({});
   public user$ = this.user.asObservable();
@@ -98,6 +100,18 @@ export class IABCardProvider {
     } catch (err) { }
   }
 
+  get ref() {
+    return this.cardIAB_Ref;
+  }
+
+  get isHidden() {
+    return this._isHidden;
+  }
+
+  get isVisible() {
+    return !this._isHidden;
+  }
+
   init(): void {
     this.logger.debug('IABCardProvider initialized');
     this.cardIAB_Ref = this.iab.refs.card;
@@ -152,7 +166,7 @@ export class IABCardProvider {
             this.logger.error(err);
           }
 
-          this.cardIAB_Ref.hide();
+          this.hide();
           break;
 
         /*
@@ -165,7 +179,7 @@ export class IABCardProvider {
             filter((user) => Object.entries(user).length > 0),
             take(1)
           ).subscribe(() => {
-            this.cardIAB_Ref.hide();
+            this.hide();
 
             this.cardIAB_Ref.executeScript(
               {
@@ -195,7 +209,7 @@ export class IABCardProvider {
          * */
 
         case 'close':
-          this.cardIAB_Ref.hide();
+          this.hide();
           break;
 
         /*
@@ -288,5 +302,40 @@ export class IABCardProvider {
           break;
       }
     });
+  }
+
+  sendMessage(message: object, cb?: (...args: any[]) => void): void {
+    const script = {
+      code: `window.postMessage(${JSON.stringify({ ...message })}, '*')`
+    };
+
+    this.cardIAB_Ref.executeScript(script, cb);
+  }
+
+  hide(): void {
+    if (this.cardIAB_Ref) {
+      this.cardIAB_Ref.hide();
+      this._isHidden = true;
+    }
+  }
+
+  show(): void {
+    if (this.cardIAB_Ref) {
+      this.cardIAB_Ref.show();
+      this._isHidden = false;
+    }
+  }
+
+  pause(): void {
+    this._pausedState = this.isVisible;
+    this.hide();
+  }
+
+  resume(): void {
+    if (this._pausedState) {
+      this.show();
+    }
+
+    this._pausedState = false;
   }
 }

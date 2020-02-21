@@ -8,12 +8,10 @@ import * as _ from 'lodash';
 // providers
 import { Observable } from 'rxjs';
 // pages
-import { InAppBrowserRef } from '../../models/in-app-browser/in-app-browser-ref.model';
 import { User } from '../../models/user/user.model';
 import {
   BitPayIdProvider,
-  IABCardProvider,
-  InAppBrowserProvider
+  IABCardProvider
 } from '../../providers';
 import { AnalyticsProvider } from '../../providers/analytics/analytics';
 import { AppProvider } from '../../providers/app/app';
@@ -74,7 +72,6 @@ export class SettingsPage {
   public walletsGroups: any[];
   public cardExperimentEnabled: boolean;
   public bitPayIdUserInfo: any;
-  private cardIAB_Ref: InAppBrowserRef;
   private network = Network[this.bitPayIdProvider.getEnvironment().network];
   private user$: Observable<User>;
   public showBalance: boolean;
@@ -95,7 +92,6 @@ export class SettingsPage {
     private touchid: TouchIdProvider,
     private analyticsProvider: AnalyticsProvider,
     private persistanceProvider: PersistenceProvider,
-    private iab: InAppBrowserProvider,
     private bitPayIdProvider: BitPayIdProvider,
     private changeRef: ChangeDetectorRef,
     private iabCardProvider: IABCardProvider
@@ -114,9 +110,7 @@ export class SettingsPage {
       .getCardExperimentFlag()
       .then(res => (this.cardExperimentEnabled = res === 'enabled'));
 
-    this.cardIAB_Ref = this.iab.refs.card;
-
-    if (this.cardIAB_Ref) {
+    if (this.iabCardProvider.ref) {
       // check for user info
       this.persistanceProvider
         .getBitPayIdUserInfo(this.network)
@@ -186,18 +180,13 @@ export class SettingsPage {
     if (this.bitPayIdUserInfo) {
       this.navCtrl.push(BitPayIdPage, this.bitPayIdUserInfo);
     } else {
-      this.cardIAB_Ref.executeScript(
-        {
-          code: `window.postMessage(${JSON.stringify({
-            message: 'pairingOnly'
-          })}, '*')`
-        },
-        () => {
-          setTimeout(() => {
-            this.cardIAB_Ref.show();
-          }, 500);
-        }
-      );
+      this.iabCardProvider.sendMessage({
+        message: 'pairingOnly'
+      }, () => {
+        setTimeout(() => {
+          this.iabCardProvider.show();
+        }, 500);
+      });
     }
   }
 
