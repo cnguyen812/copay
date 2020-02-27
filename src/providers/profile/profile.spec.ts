@@ -1373,7 +1373,7 @@ describe('Profile Provider', () => {
     });
   });
 
-  describe('hasAbilityToPay' , () => {
+  describe('hasWalletWithFunds' , () => {
     beforeAll(async () => {
       spyOn(RateProvider.prototype, 'getCoin').and.callFake(() => new Promise((resolve) => resolve([{ code: 'BOB', rate: 123 }])));   
     });
@@ -1383,19 +1383,19 @@ describe('Profile Provider', () => {
 
     it('should return true with multiple wallets', () => {
       // The all wallets have more than 10 BOB worth of btc.
-      const res = profileProvider.hasAbilityToPay(10, 'BOB');
+      const res = profileProvider.hasWalletWithFunds(10, 'BOB');
       expect(res).toEqual(true);
     });
 
     it('should return true just barely', () => {
       // The wallet w/ 10 btc should equate to 123 * 10 bob, which would result in this returning true
-      const res = profileProvider.hasAbilityToPay(1230, 'BOB');
+      const res = profileProvider.hasWalletWithFunds(1230, 'BOB');
       expect(res).toEqual(true);
     });
 
     it('should return false', () => {
       // The wallet w/ 10 btc is the biggest wallet. So no wallets are able to pay 1231 BOB.
-      const res = profileProvider.hasAbilityToPay(1231, 'BOB');
+      const res = profileProvider.hasWalletWithFunds(1231, 'BOB');
       expect(res).toEqual(false);
     });
 

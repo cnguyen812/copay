@@ -1853,7 +1853,12 @@ export class ProfileProvider {
     return keyIdIndex >= 0;
   }
 
-  public hasAbilityToPay(fiatAmount: number, fiatCurrency: string): boolean {
+  /**
+   * Checks to see if a wallet exists with minimim fiat amount's worth in it (to pay invoice, for example) 
+   * @param fiatAmount Minimum fiat amount
+   * @param fiatCurrency Fiat currency ('USD', 'EUR', etc.)
+   */
+  public hasWalletWithFunds(fiatAmount: number, fiatCurrency: string): boolean {
     const wallets = this.getWalletsFromGroup({ minFiatCurrency: `${fiatAmount} ${fiatCurrency}` });
 
     return Boolean(wallets.length);
