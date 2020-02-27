@@ -1373,7 +1373,7 @@ describe('Profile Provider', () => {
     });
   });
 
-  fdescribe('hasAbilityToPay' , () => {
+  describe('hasAbilityToPay' , () => {
     beforeAll(async () => {
       spyOn(RateProvider.prototype, 'getCoin').and.callFake(() => new Promise((resolve) => resolve([{ code: 'BOB', rate: 123 }])));   
     });
