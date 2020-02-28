@@ -1373,10 +1373,13 @@ describe('Profile Provider', () => {
     });
   });
 
-  describe('hasWalletWithFunds' , () => {
+  describe('hasWalletWithFunds', () => {
     beforeAll(async () => {
-      spyOn(RateProvider.prototype, 'getCoin').and.callFake(() => new Promise((resolve) => resolve([{ code: 'BOB', rate: 123 }])));   
+      spyOn(RateProvider.prototype, 'getCoin').and.callFake(
+        () => new Promise(resolve => resolve([{ code: 'BOB', rate: 123 }]))
+      );
     });
+
     beforeEach(() => {
       profileProvider.wallet = _.clone(walletMock);
     });
@@ -1398,6 +1401,5 @@ describe('Profile Provider', () => {
       const res = profileProvider.hasWalletWithFunds(1231, 'BOB');
       expect(res).toEqual(false);
     });
-
   });
 });

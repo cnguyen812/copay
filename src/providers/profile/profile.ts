@@ -1773,17 +1773,22 @@ export class ProfileProvider {
       );
     }
 
-    if (opts.minFiatCurrency) { // e.g.: '10 USD'
+    if (opts.minFiatCurrency) {
+      // e.g.: '10 USD'
       const minFiatCurrency = opts.minFiatCurrency.split(' ')[0]; // '10'
       const fiatCurrency = opts.minFiatCurrency.split(' ')[1]; // 'USD'
-      
+
       ret = ret.filter(wallet => {
         if (_.isEmpty(wallet.cachedStatus)) return true;
 
-        const availableBalanceFiat = this.rateProvider.toFiat(wallet.cachedStatus.availableBalanceSat, fiatCurrency, wallet.coin);
+        const availableBalanceFiat = this.rateProvider.toFiat(
+          wallet.cachedStatus.availableBalanceSat,
+          fiatCurrency,
+          wallet.coin
+        );
 
         return availableBalanceFiat >= Number(minFiatCurrency);
-      })
+      });
     }
 
     return _.sortBy(ret, 'order');
@@ -1853,13 +1858,11 @@ export class ProfileProvider {
     return keyIdIndex >= 0;
   }
 
-  /**
-   * Checks to see if a wallet exists with minimim fiat amount's worth in it (to pay invoice, for example) 
-   * @param fiatAmount Minimum fiat amount
-   * @param fiatCurrency Fiat currency ('USD', 'EUR', etc.)
-   */
+  // Checks to see if a wallet exists with minimim fiat amount's worth in it (to pay invoice, for example)
   public hasWalletWithFunds(fiatAmount: number, fiatCurrency: string): boolean {
-    const wallets = this.getWalletsFromGroup({ minFiatCurrency: `${fiatAmount} ${fiatCurrency}` });
+    const wallets = this.getWalletsFromGroup({
+      minFiatCurrency: `${fiatAmount} ${fiatCurrency}`
+    });
 
     return Boolean(wallets.length);
   }
