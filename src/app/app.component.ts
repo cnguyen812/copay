@@ -51,6 +51,7 @@ import { CoinbasePage } from '../pages/integrations/coinbase/coinbase';
 import { SelectInvoicePage } from '../pages/integrations/invoice/select-invoice/select-invoice';
 import { ShapeshiftPage } from '../pages/integrations/shapeshift/shapeshift';
 import { SimplexPage } from '../pages/integrations/simplex/simplex';
+import { SimplexBuyPage } from '../pages/integrations/simplex/simplex-buy/simplex-buy';
 import { DisclaimerPage } from '../pages/onboarding/disclaimer/disclaimer';
 import { OnboardingPage } from '../pages/onboarding/onboarding';
 import { PaperWalletPage } from '../pages/paper-wallet/paper-wallet';
@@ -98,6 +99,7 @@ export class CopayApp {
     PaperWalletPage,
     ShapeshiftPage,
     SimplexPage,
+    SimplexBuyPage,
     SelectInvoicePage,
     WalletDetailsPage
   };
@@ -184,14 +186,14 @@ export class CopayApp {
 
     this.logger.info(
       'Platform ready (' +
-        readySource +
-        '): ' +
-        this.appProvider.info.nameCase +
-        ' - v' +
-        this.appProvider.info.version +
-        ' #' +
-        this.appProvider.info.commitHash +
-        deviceInfo
+      readySource +
+      '): ' +
+      this.appProvider.info.nameCase +
+      ' - v' +
+      this.appProvider.info.version +
+      ' #' +
+      this.appProvider.info.commitHash +
+      deviceInfo
     );
 
     if (this.platform.is('cordova')) {
@@ -200,15 +202,15 @@ export class CopayApp {
       // Set User-Agent
       this.userAgent.set(
         this.appProvider.info.name +
-          ' ' +
-          this.appProvider.info.version +
-          ' (' +
-          this.device.platform +
-          ' ' +
-          this.device.version +
-          ' - ' +
-          this.device.model +
-          ')'
+        ' ' +
+        this.appProvider.info.version +
+        ' (' +
+        this.device.platform +
+        ' ' +
+        this.device.version +
+        ' - ' +
+        this.device.model +
+        ')'
       );
 
       // Set to portrait
@@ -400,7 +402,11 @@ export class CopayApp {
       // wait for wallets status
       setTimeout(() => {
         const globalNav = this.getGlobalTabs().getSelected();
-        globalNav.push(this.pageMap[nextView.name], nextView.params);
+        globalNav.push(this.pageMap[nextView.name], nextView.params).then(() => {
+          if (typeof nextView.callback === 'function') {
+            nextView.callback();
+          }
+        });
       }, 300);
     });
   }

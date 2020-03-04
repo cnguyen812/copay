@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as bitauthService from 'bitauth';
 import { Events } from 'ionic-angular';
+import * as _ from 'lodash';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { InAppBrowserRef } from '../../models/in-app-browser/in-app-browser-ref.model';
 import { User } from '../../models/user/user.model';
@@ -18,6 +19,7 @@ import {
   PersistenceProvider
 } from '../../providers/persistence/persistence';
 import { BitPayProvider } from '../bitpay/bitpay';
+import { SimplexProvider } from '../simplex/simplex';
 
 @Injectable()
 export class IABCardProvider {
@@ -39,8 +41,9 @@ export class IABCardProvider {
     private actionSheetProvider: ActionSheetProvider,
     private iab: InAppBrowserProvider,
     private translate: TranslateService,
-    private profileProvider: ProfileProvider
-  ) {}
+    private profileProvider: ProfileProvider,
+    private simplexProvider: SimplexProvider
+  ) { }
 
   async getCards() {
     const json = {
@@ -91,9 +94,9 @@ export class IABCardProvider {
             cards
           );
         },
-        () => {}
+        () => { }
       );
-    } catch (err) {}
+    } catch (err) { }
   }
 
   init(): void {
@@ -272,7 +275,7 @@ export class IABCardProvider {
                 );
               }
             );
-          } catch (err) {}
+          } catch (err) { }
 
           break;
 
@@ -284,6 +287,21 @@ export class IABCardProvider {
 
         case 'addCard':
           this.getCards();
+          break;
+
+        case 'buyCrypto':
+          this.simplexProvider.getSimplex().then(simplexData => {
+            const hasData = simplexData && !_.isEmpty(simplexData);
+            const nextView = {
+              name: hasData ? 'SimplexPage' : 'SimplexBuyPage',
+              params: {},
+              callback: () => {
+                this.cardIAB_Ref.hide();
+              }
+            };
+
+            this.events.publish('IncomingDataRedir', nextView);
+          });
           break;
 
         default:

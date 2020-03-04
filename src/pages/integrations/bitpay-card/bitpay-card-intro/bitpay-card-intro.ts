@@ -13,7 +13,8 @@ import { PopupProvider } from '../../../../providers/popup/popup';
 // pages
 import {
   InAppBrowserProvider,
-  PersistenceProvider
+  PersistenceProvider,
+  ProfileProvider
 } from '../../../../providers';
 import { BitPayCardPage } from '../bitpay-card';
 
@@ -34,7 +35,8 @@ export class BitPayCardIntroPage {
     private navCtrl: NavController,
     private externalLinkProvider: ExternalLinkProvider,
     private persistenceProvider: PersistenceProvider,
-    private iab: InAppBrowserProvider
+    private iab: InAppBrowserProvider,
+    private profileProvider: ProfileProvider
   ) {
     this.persistenceProvider.getCardExperimentFlag().then(status => {
       this.cardExperimentEnabled = status === 'enabled';
@@ -113,6 +115,17 @@ export class BitPayCardIntroPage {
 
   public async orderBitPayCard() {
     if (this.cardExperimentEnabled) {
+      const hasWalletWithFunds = this.profileProvider.hasWalletWithFunds(10, 'USD');
+
+      if (!hasWalletWithFunds) {
+        this.iab.sendMessageToIAB(this.iab.refs.card, {
+          message: 'needFunds'
+        }, () => {
+          this.iab.refs.card.show();
+        });
+        return;
+      }
+
       this.iab.refs.card.executeScript(
         {
           code: `window.postMessage(${JSON.stringify({
